@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<record id="view_product_mrp_captherm" model="ir.ui.view">
+			<field name="name">Color Coding MRP</field>
+			<field name="model">mrp.production</field>
+			<field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<xpath expr="/form/sheet/notebook/page[@string='Consumed Products']/group/group[@string='Products to Consume']/field[@name='move_lines']/tree[@string='Products to Consume']" position='attributes'>
+					<attribute name="colors">blue:state == 'draft';red:state in ('waiting','confirmed');gray:state == 'cancel';green:state in ('done','assigned') </attribute>				
+				</xpath>
+			</field>
+		</record>
+	</data>
+</openerp>

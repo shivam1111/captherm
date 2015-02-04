@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data noupdate="1">
+		<record id = "res_users_data_position1" model = "users.position">
+			<field name="id">1</field>
+			<field name="name">User</field>
+		</record>
+		<record id = "res_users_data_position2" model = "users.position">
+			<field name="id">2</field>
+			<field name="name">Manager</field>
+		</record>
+		<record id = "res_users_data_position3" model = "users.position">
+			<field name="id">3</field>
+			<field name="name">Administrator</field>
+		</record>
+		<record id = "res_users_data_position4" model = "users.position">
+			<field name="id">4</field>
+			<field name="name">Super Administrator</field>
+		</record>
+	</data>
+	<data noupdate="1">
+        <record model="res.users" id="base.user_root">
+            <field name="partner_id" ref="base.partner_root"/>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="positions" ref="res_users_data_position4"/>
+            <field name="company_ids" eval="[(4, ref('base.main_company'))]"/>
+            <field name="menu_id" ref="base.action_menu_admin"/>
+            <field name="signature">--Administrator</field>
+        </record>
+	</data>
+</openerp>

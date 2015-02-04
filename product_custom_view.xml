@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<!--Only managers and above are alowed to access incoming shipment in warehouse -->
+<!--		<menuitem action="stock.action_picking_tree4" id="stock.menu_action_picking_tree4" parent="stock.menu_stock_warehouse_mgmt" groups="base.module_category_warehouse_management" sequence="1"/> -->
+		<!-- Adding Next three months forecast view -->
+		<record id="forecast_next_three_months" model="ir.ui.view">
+			<field name="name">Next Three Months Forecast</field>
+			<field name="model">product.product</field>
+			<field name="inherit_id" ref="stock.view_normal_procurement_locations_form"/>
+			<field name="arch" type="xml">
+				<group name="status" position ='after'>
+					<group>
+						<field name="virtual_available_months" class="oe_inline"/>
+					</group>
+				</group>
+			</field>
+		</record>
+		<!-- custom tree view -->
+		<record id="view_product_image_tree" model="ir.ui.view">
+			<field name="name">Tree View Image</field>
+			<field name="model">product.product</field>
+			<field name="inherit_id" ref="product.product_product_tree_view"/>
+			<field name="arch" type="xml">
+				<xpath expr = "/tree" position="inside">
+					<field name="active"/>
+				</xpath>
+				<xpath expr = "/tree" position="attributes">
+					<attribute name="colors">green:active == False</attribute>
+					<attribute name="editable">top</attribute>
+					<attribute name="groups">base.group_sale_manager,purchase.group_purchase_manager,stock.group_stock_manager,mrp.group_mrp_manager</attribute>
+				</xpath>
+				<xpath expr = "/tree/field[@name='name']" position ="after">
+					<field name="supply_method"/>
+				</xpath>
+				<xpath expr = "/tree/field[@name='name']" position ="attributes">
+					<attribute name="string">Product Name</attribute>
+				</xpath>
+				<xpath expr = "/tree/field[@name='state']" position ="replace">
+					<field name="manager_approval" string="Status"/>
+				</xpath>
+				<xpath expr = "/tree/field[@name='default_code']" position ="attributes">
+					<attribute name="string">Part No.</attribute>
+				</xpath>
+				<xpath expr = "/tree/field[@name='name']" position ="before">
+					<field name="image_final" widget="image" />
+				</xpath>
+				<xpath expr = "/tree/field[@name='default_code']" position ="before">
+					<button name="form_view_open" icon="gtk-open" type="object" string="Open Record" class="oe_highlight" />
+				</xpath>
+			</field>
+		</record>
+		<!-- 
+		<record id="form_view_open_1" model="ir.actions.act_window">
+            <field name="name">Products</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">product.product</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+           <field name="view_id" ref="view_product_image_tree"/>
+           <field name="target">current</field>
+</record>
+		 -->
+		<record id="view_product_custom_reordering" model="ir.ui.view">
+			<field name="name">Reordering Rules</field>
+			<field name="model">product.product</field>
+			<field name="inherit_id" ref="product.product_normal_form_view"/>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<xpath expr="/form/sheet" position="before">
+					<header>
+						<button name="manager_approval_cancel" string="Cancel Approval" type="object"
+						groups = "purchase.group_purchase_manager, base.group_sale_manager,stock.group_stock_manager"
+							attrs = "{'invisible':[('manager_approval','=','no')]}"/>
+						
+					<button name="manager_approval" string="Manager Approval" type="object"
+						groups = "purchase.group_purchase_manager ,base.group_sale_manager,stock.group_stock_manager"
+							attrs = "{'invisible':[('manager_approval','=','yes')]}"/>
+                	<field name="manager_approval" align='right' widget="statusbar" statusbar_visible="no,yes" statusbar_colors='{"no":"red","yes":"blue"}' readonly="1"/>
+					</header>
+				</xpath>
+				<xpath expr="/form/sheet/div" position="before">
+					<div>
+						<group>
+							<group>
+								<field name="image_final" nolabel="1" widget="image" class="oe_avatar oe_left"/>
+							</group>
+							<group  class="oe_right">
+								<field name="id" invisible="1"/> 
+								<field name="part_no" placeholder="Engineering P/N" class = "oe_left" />
+								<field name="default_code" placeholder = "Part No." string="Part No." required="1" />
+							</group>
+							<newline/>
+							<div>
+								<field name="check1" nolabel = "1" 
+								on_change="on_change_image(check1,onchange_flag,context)" context="{'source':1}"
+								 attrs="{'invisible':[('image_flag','!=',1)]}" />
+								<field name="check2" nolabel="1" on_change="on_change_image(check2,onchange_flag,context)" 
+								context="{'source':2}" attrs="{'invisible':[('image_flag','!=',1)]}"/>
+								<field name="check3" nolabel="1" on_change="on_change_image(check3,onchange_flag,context)" 
+								context="{'source':3}" attrs="{'invisible':[('image_flag','!=',1)]}"/>
+								<field name="check4" nolabel="1" on_change="on_change_image(check4,onchange_flag,context)" 
+								context="{'source':4}" attrs="{'invisible':[('image_flag','!=',1)]}"/>								
+							</div>							
+						</group>						
+					</div>					
+				</xpath>
+				<xpath expr="/form/sheet/field[@name='image_medium']" position="attributes">  
+					<attribute name="invisible">1</attribute>
+				</xpath>
+				<xpath expr="/form/sheet/notebook/page[@string='Information']/group/group/field[@name='default_code']" position="replace"/>  
+				<xpath expr="/form/sheet/notebook/page[@string='Sales']" position='attributes'>
+					<attribute name="invisible">1</attribute>
+				</xpath>
+				<xpath expr="/form/sheet/notebook/page[@string='Information']" position="inside">
+                    <group name="sale">
+                        <group string="Sale Conditions">
+                            <label for="warranty"/>
+                            <div>
+                                <field name="warranty" class="oe_inline"/> months
+                            </div>
+                        </group>
+                        <group groups="product.group_uos" string="Unit of Measure">
+                            <field name="uos_id"/>
+                            <field name="uos_coeff"/>
+                            <field name="mes_type"/>
+                        </group>
+                    </group>
+                    <field name="packaging" groups="product.group_stock_packaging">
+                        <form string="Packaging" version="7.0">
+                            <group col="4">
+                                <field name="ean"/>
+                                <field name="sequence" invisible="1"/>
+                                <newline/>
+                                <field name="qty"/>
+                                <field name="ul"/>
+                                <field name="weight_ul"/>
+                                <separator colspan="4" string="Palletization"/>
+                                <field name="ul_qty"/>
+                                <field name="rows"/>
+                                <field name="weight"/>
+                                <separator colspan="4" string="Pallet Dimension"/>
+                                <field name="height"/>
+                                <field name="width"/>
+                                <field name="length"/>
+                            </group>
+                            <separator colspan="4" string="Description"/>
+                            <field name="name"/>
+                        </form>
+                    </field>
+                    <separator string="Description for Quotations"/>
+                    <field name="description_sale" placeholder="note to be displayed on quotations..."/>
+				</xpath>
+				<xpath expr="/form/sheet/notebook/page[@string='Information']" position='after'>
+					<page string="Reordering Rules" attrs ="{'invisible':[('flag','=',0)]}" groups="base.group_sale_manager,purchase.group_purchase_manager">
+						<group>
+							<field name="onchange_flag" invisible="1"/>
+							<field name="image_flag" invisible='1'/>
+							<field name="flag" invisible="1"/>
+							<field name="line_ids" nolabel="1">
+								<tree string="view" >
+										<field name="connect_product" invisible="1"/>
+                                        <field name = "product_id" />
+                                        <field name="name"/>
+                                        <field name="product_min_qty"/>
+                                        <field name="product_max_qty"/>
+								</tree>
+							</field>
+						</group>
+					</page>					
+				</xpath>
+				<xpath expr="/form/sheet/div[@name='buttons']" position="inside">
+						<button name="flag_update" type = 'object' string='Create Reordering Rule'  
+						attrs ="{'invisible':[('flag','=',1)]}" groups="base.group_sale_manager,purchase.group_purchase_manager"/>					
+				</xpath>
+				<xpath expr="/form/sheet/notebook/page[@string='Inventory']" position='after'>
+					<page string="Snapshots">						
+						<group col='2'>
+							<field name="image_medium" string = 'Image 1' nolabel="1" widget="image" class="oe_avatar oe_left"/>
+							<field name="image2" string = 'Image 2' nolabel="1" widget="image" class="oe_avatar oe_left"/>
+							<field name="image3" string = 'Image 3' nolabel="1" widget="image" class="oe_avatar oe_left"/>
+							<field name="image4" string = 'Image 4' nolabel="1" widget="image" class="oe_avatar oe_left"/>
+						<div>
+							<button name="update_image_flag" type="object" string="Update Images"/>
+						</div>							
+						</group>			
+					</page>	
+				</xpath>
+				<xpath expr="/form/sheet/notebook/page[@string='Inventory']" position='after'>
+					<page string="Product Customers">
+						<group>
+							<field name="customer_lines" nolabel="1"/>
+						</group>
+					</page>					
+				</xpath>
+			</field>
+		</record>
+		<record id="view_project_kanban_inherited_modified" model="ir.ui.view">
+	        <field name="name">Prduct.Kanban.Inherited</field>
+	        <field name="model">product.product</field>
+	        <field name="inherit_id" ref="product.product_kanban_view"/>
+	        <field name="arch" type="xml">
+<!--   			<xpath expr="/kanban/field[@name='image_small']" position='attributes'>
+    				<attribute name='invisible'>1</attribute>
+				</xpath> -->
+				<xpath expr="/kanban/field[@name='type']" position= 'after'>
+					<field name="image_final"/>
+				</xpath>
+	            <xpath expr="//div[contains(@class, 'oe_kanban_vignette oe_semantic_html_override')]/a[@type='open']" 
+	            	position="replace" >
+	                <a type="open"><img t-att-src="kanban_image('product.product', 'image_final', record.id.value)" class="oe_kanban_image"/></a>
+		        </xpath>   	
+	        </field>
+        </record>
+		<record id="view_partner_form_modified" model="ir.ui.view">
+			<field name="name">Adding RFQ line</field>
+			<field name="model">res.partner</field>
+			<field name="inherit_id" ref="base.view_partner_form"/>
+			<field name="groups_id" eval="[(6, 0, [ref('base.group_sale_salesman'),ref('base.group_sale_salesman_all_leads'),ref('base.group_sale_manager') ])]"/>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<xpath expr="/form/sheet/notebook/page[@string='Internal Notes']" position="after">
+					<page string="Supplier order Lines" attrs="{'invisible':[('supplier','=',False)]}">
+						<group col="4">
+							<field name="order_line_supplier" string = "RFQ History" create="0"/>
+						</group>	
+						<group col="4">
+							<field name="order_purchase_order"/>
+						</group>						
+					</page>
+					<page string="Customer order Lines" attrs="{'invisible':[('customer','=',False)]}">
+						<field name = "quote_history" string = "Quotations"/>
+						<field name="order_line_customer" string = "Sale Orders"/> 
+					</page>
+				</xpath>
+			</field>
+		</record>
+		<record id="view_product_custom_supplierinfo_tree_view" model="ir.ui.view">
+			<field name="name">Product Supplier Info Tree View</field>
+			<field name="model">product.supplierinfo</field>
+			<field name="inherit_id" ref="product.product_supplierinfo_tree_view"/>
+			<field name="arch" type="xml">
+				<xpath expr="/tree/field[@name='min_qty']" position = "after">
+					<field name="supplier_price"/>
+					<field name="date"/>					
+				</xpath>
+			</field>
+		</record>			
+		<record id="view_product_custom_supplierinfo" model="ir.ui.view">
+			<field name="name">Product Supplier Info</field>
+			<field name="model">product.supplierinfo</field>
+			<field name="inherit_id" ref="product.product_supplierinfo_form_view"/>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<xpath expr="/form/group/field[@name='delay']" position="after">
+					<field name="service"/>
+					<field name="supplier_price" string="Latest Price"/>
+					<field name="date"/>
+				</xpath>
+				<xpath expr="/form" position="inside">
+					<notebook>
+						<page string ="Order Line History">
+							<field name="history_line" nolabel="1" delete="0">
+								<tree string="Tree View" readonly="1">
+									<field name="name"/>
+									<field name="date_planned"/>
+									<field name="product_id"/>
+									<field name="product_qty" string="Quantity"/>
+									<field name="price_unit"/>
+									<field name="taxes_id"/>
+									<field name="price_subtotal"/>														
+								</tree>
+							</field>
+						</page>		
+					</notebook>		
+				</xpath>
+			</field>
+		</record>
+		<!-- increasing the domain of the product tab --> 
+        <record id="product.product_normal_action" model="ir.actions.act_window">
+            <field name="name">Products</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">product.product</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form,kanban</field>
+            <field name='domain'>['|',('active','=',True),('active','=',False)]</field>
+            <field name="view_id" ref="product.product_product_tree_view"/>
+            <field name="search_view_id" ref="product.product_search_form_view"/>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to define a new product.
+              </p><p>
+                You must define a product for everything you buy or sell,
+                whether it's a physical product, a consumable or service.
+              </p>
+            </field>
+        </record>
+        <record id="product.product_normal_action_puchased" model="ir.actions.act_window">
+            <field name="name">Products</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">product.product</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name='domain'>['|',('active','=',True),('active','=',False)]</field>
+            <field name="context">{"search_default_filter_to_purchase":1}</field>
+            <field name="view_id" ref="product.product_kanban_view"/>
+            <field name="search_view_id" ref="product.product_search_form_view"/>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to define a new product.
+              </p><p>
+                You must define a product for everything you purchase, whether
+                it's a physical product, a consumable or services you buy to
+                subcontractants.
+              </p><p>
+                The product form contains detailed information to improve the
+                purchase process: prices, procurement logistics, accounting data,
+                available suppliers, etc.
+              </p>
+            </field>
+        </record>
+        <menuitem name="Products" id="purchase.menu_procurement_partner_contact_form" action="product.product_normal_action_puchased"
+          parent="purchase.menu_procurement_management_product" />
+
+        <!--channging login label in res.users-->
+		<record id="view_res_users_form_mod" model="ir.ui.view">
+			<field name="name">Res Users login</field>
+			<field name="model">res.users</field>
+			<field name="inherit_id" ref="base.view_users_form"/>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<xpath expr="/form/sheet/div/label[@for='login']" position="replace">
+					<label string="Login Name" class="oe_edit_only"/> 
+				</xpath>
+	        </field>
+        </record>
+		<!--  making the mfg lead time field mandatory -->
+		<record id="mfg_lead_time_required" model="ir.ui.view">
+			<field name="name">mfg.lead.time</field>
+			<field name="model">product.template</field>
+			<field name="inherit_id" ref="product.product_template_form_view"/>
+			<field name="arch" type="xml">
+				<xpath expr = "/form/notebook/page[@string='Procurement &amp; Locations']/group/group/div/field[@name='produce_delay']" position="attributes">
+					<attribute name="required">1</attribute>
+				</xpath>
+			</field>
+		</record>
+	</data>
+</openerp>

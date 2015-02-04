@@ -1,0 +1,13 @@
+Once the confirm_rfq button is clicked
+
+The RFQ will be saved in the supplier form/DB
+//Remeber to replace the PO with RFQ
+Ask: How does wants the prices to appear automatically in the RFQ and PO
+Also the order lines of the RFQ will be saved in the product form in the supplier line (seller_ids)
+At the same time the product in the supplier form will also get updated.This will give the product that are delivered 
+by the supplier also their latest prices for that product.
+
+Whats left in purchase:
+
+1. Layout
+2. What way do i have to update the unit price in the PO

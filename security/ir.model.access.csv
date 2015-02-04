@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_purchase_order_manager,purchase.order,model_purchase_order,base.group_sale_manager,1,1,1,1
+access_purchase_order_line_manager,purchase.order.line,model_purchase_order_line,base.group_sale_manager,1,1,1,1
+access_purchase_order_user,purchase.order,model_purchase_order,base.group_sale_salesman,1,1,1,1
+access_purchase_order_line_user,purchase.order.line,model_purchase_order_line,base.group_sale_salesman,1,1,1,1
+access_sale_order_shipping_status_manager,sale.shipping.order.status,model_sales_shipping_order_status,base.group_sale_manager,1,1,1,1
+access_sale_order_shipping_status_user,sale.shipping.order.status,model_sales_shipping_order_status,base.group_sale_salesman,1,1,1,1
+access_mrp_bom_user,mpr.bom.user,model_mrp_bom,base.group_sale_salesman,1,1,1,1

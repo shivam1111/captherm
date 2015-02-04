@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<!-- Adding Shop ID to Sale Order Tree View -->
+		<record id="view_order_line_tree_modified_locations" model="ir.ui.view">
+            <field name="name">tree view shop_ids</field>
+            <field name="model">sale.order</field>
+			<field name="inherit_id" ref="sale.view_order_tree"/>
+            <field name="arch" type="xml">
+				<xpath expr="/tree/field[@name='user_id']" postion = "after">
+					<field name="shop_id"/>
+				</xpath>            	
+            </field>
+        </record>
+		<!--Customer Tab Customizations-->
+		<record id="res_partner_customer_lead_modified" model="ir.ui.view">
+            <field name="name">res.partner.modified.lead</field>
+            <field name="model">res.partner</field>
+			<field name="inherit_id" ref="base.view_partner_form"/>
+			<field name="groups_id" eval="[(6, 0, [ref('base.group_sale_salesman'),ref('base.group_sale_salesman_all_leads'),ref('base.group_sale_manager') ])]"/>
+			<field name="type">form</field>
+            <field name="arch" type="xml">
+            	<xpath expr="/form/sheet/notebook/page[@string='Sales &amp; Purchases']/group/group/field[@name='date']" position="attributes">
+<attribute name="required">0</attribute>
+				</xpath>
+            	<xpath expr="/form/sheet/notebook/page[@string='Sales &amp; Purchases']/group/group/field[@name='lang']" position="attributes">
+<attribute name="required">1</attribute>
+				</xpath>
+            	<xpath expr="/form/sheet/notebook/page[@string='Sales &amp; Purchases']/group/group/field[@name='user_id']" position="attributes">
+<attribute name="required">0</attribute>
+				</xpath>
+				<xpath expr="/form/sheet/group/group/div/field[@name='street']" position="attributes">
+<attribute name="attrs">{'required':[('use_parent_address','=',False)]}</attribute>
+				</xpath>
+				<xpath expr="/form/sheet/div[@class='oe_title']/field[@name='parent_id']" position="attributes">
+<attribute name="attrs">{'invisible': [('is_company','=', True),('parent_id', '=', False)],'required':[('is_company','=', False)]}</attribute>
+				</xpath>
+            	<xpath expr = "/form/sheet/notebook/page[@string='Sales &amp; Purchases']/group/group/field[@name='supplier']" position = "after">
+					<field name="lead_check" string="Lead"/>
+				</xpath>
+				<xpath expr = "/form/sheet/notebook/page[@string='Sales &amp; Purchases']/group/group/field[@name='customer']" position = "attributes">
+					<attribute name="groups">base.group_sale_manager,purchase.group_purchase_manager</attribute>
+				</xpath>
+				<xpath expr = "/form/sheet/notebook/page[@string='Sales &amp; Purchases']/group/group/field[@name='active']" position = "attributes">
+					<attribute name="groups">base.group_sale_manager,purchase.group_purchase_manager</attribute>
+				</xpath>
+        	</field>
+		</record>
+
+		<!---Customer Action Domain Extension-->
+        <record id="base.action_partner_form" model="ir.actions.act_window">
+            <field name="name">Accounts</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">res.partner</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name="domain">['|',('customer','=',True),('lead_check','=',True)]</field>
+            <field name="context">{'source_create':4}</field>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to add a contact in your address book.
+              </p><p>
+                OpenERP helps you easily track all activities related to
+                a customer; discussions, history of business opportunities,
+                documents, etc.
+              </p>
+            </field>
+        </record>
+        
+        <menuitem id="base.menu_partner_form" name="Accounts" parent="base.menu_sales" 
+        action="base.action_partner_form" sequence="1"/>
+		
+    	<!--Colour Differentiation in Customer Tab-->
+	   	<record id="res_partner_customer_lead" model="ir.ui.view">
+            <field name="name">Lead</field>
+            <field name="groups_id" eval="[(6, 0, [ref('base.group_sale_salesman'),ref('base.group_sale_salesman_all_leads'),ref('base.group_sale_manager') ])]"/>
+            <field name="model">res.partner</field>
+			<field name="inherit_id" ref="base.view_partner_tree"/>
+			<field name="type">form</field>
+            <field name="arch" type="xml">
+            	<xpath expr ="/tree/field[@name='name']" position="after">
+					<field name="customer" invisible="1"/>
+					<field name="lead_check" invisible="1"/>
+					<field name="supplier" invisible="1"/>							
+            	</xpath>
+            	<xpath expr ="/tree" position="attributes">
+            		<attribute name="colors">blue:lead_check == True</attribute>
+            	</xpath>
+			</field>
+		</record>	
+		
+		<!--Create a Manager Approval Button -->
+        <!--Changing the domain of Quotations-->
+		<!--Adding Attachment Tab in Quotations-->        
+	   	
+    	<record id="res_quotation_approval_buttonss" model="ir.ui.view">
+            <field name="name">Quotations Manager Approvals</field>
+            <field name="model">sale.order</field>
+            <field name="priority">1000</field>
+			<field name="inherit_id" ref="sale.view_order_form"/>
+			<field name="type">form</field>
+            <field name="arch" type="xml">
+				<xpath expr="/form/sheet/group/group" position = "after">
+					<group>
+						<field name="packing_detail"/>
+						<field name="shipping_method"/>
+					</group>
+				</xpath>
+           		<xpath expr="/form/sheet/notebook/page[@string='Order Lines']" position="after">
+            		<page string="Shipping &amp; Packing Status ">
+            			<field name="shipping_status_lines">
+							<tree string="Shipping Packing Status" editable="1">
+								<field name="order_status"/>
+								<field name="date"/>								
+							</tree>
+            			</field>
+            		</page>
+            	</xpath>
+				<xpath expr="/form/sheet/notebook/page[@string='Other Information']/group/group[@name='sale_pay']/field[@name='payment_term']" position="attributes">
+            		<attribute name="required">1</attribute>
+            	</xpath>
+            	<xpath expr="/form/sheet/h1/label[@string='Quotation ']" position="replace">
+            		<label string="No string" invisible="1"/>
+            	</xpath>
+            	<xpath expr="/form/sheet/h1/label[@string='Sales Order ']" position="replace">
+            		<label string="No string" invisible="1"/>
+            	</xpath>
+            	<xpath expr="/form/sheet/h1/field[@name='name']" position="replace">
+            		<field name='name' readonly='1'/>
+            	</xpath>
+            	<xpath expr="/form/header/field[@name='state']" position="replace">
+                    <field name="state" widget="statusbar" statusbar_visible="draft,invoiced,done"/>
+            	</xpath>
+            	<xpath expr="/form/sheet/group/group/field[@name='partner_id']" position="attributes">
+            		<attribute name="domain">['|',('customer','=',True),('lead_check','=',True)]</attribute>
+					<attribute name="string">Account</attribute>
+					<attribute name="context">{'source_create':4}</attribute>
+	        	</xpath>
+            	<xpath expr = "/form/sheet/h1/field[@name='name']" position="after">
+            		<field name="manager_approval" invisible="1"/>
+					<field name="confirm_switch" invisible="1"/>            		
+            	</xpath>
+            	<xpath expr="/form/header/button[@name='action_button_confirm']" position = "replace">
+            		<button name="action_button_confirm"  string="Confirm Sales" class="oe_highlight" groups = "base.group_sale_manager"  
+            		attrs="{'invisible': ['|','|',('state','not in',['draft','sent']),('manager_approval','!=','yes'),('confirm_switch','=',True) ]}"
+        			type="object" />
+            	</xpath>
+
+            	<xpath expr="/form/header/button[@name='cancel']" position = "replace">
+            		<button name="cancel" 
+            		attrs="{'invisible':['|', ('manager_approval','=','yes'),('state','not in',['draft','sent'])]}" 
+            		string="Cancel" groups="base.group_user"/>
+            	</xpath> 
+            	
+            	<xpath expr="/form/sheet/h1" position = "after">
+            		<group align='left'>
+            			<field name="manager_approval" string ='Status' widget="statusbar" statusbar_visible="wait,yes"/>
+					</group>            		
+            	</xpath>
+            	<xpath expr ="/form/header/button[@name = 'action_quotation_send']" position="replace">
+                    <button name="action_quotation_send" string="Send by Email" type="object" 
+                    attrs="{'invisible':['|',('state','not in',['draft','sent','progress']) ,('manager_approval','!=','yes')]}" class="oe_highlight" />
+            	</xpath>
+            	
+              	<xpath expr ="/form/header/button[@name = 'action_cancel']" position="replace">
+            		<button name="action_cancel" 
+            			attrs="{'invisible':['|',('state','not in',['manual','progress']),('manager_approval','=','yes')]}" 
+            			string="Cancel" type="object" groups="base.group_user">
+            		</button> 
+            	</xpath> 
+            	
+            	<xpath expr ="/form/header/button[@name = 'action_quotation_send']" position="after">
+					<button name="manager_approval" 
+					type="object" class="oe_highlight" 
+					string="Manager Approval" 
+					groups = "base.group_sale_manager"
+					attrs = "{'invisible':['|',('state','=','cancel'),('manager_approval','=','yes')]}"/>							
+            	</xpath>
+	           	<xpath expr ="/form/header/button[@name = 'copy_quotation']" position="replace">
+	           		<button name="copy_quotation"  string="New Copy of Quotation" type="object"
+	           		attrs="{'invisible':['|',('state','!=','cancel'),('manager_approval','=','yes')]}"/>
+	           	</xpath>
+            	<xpath expr ="/form/header/button[@name = 'action_quotation_send']" position="after">
+					<button name="manager_approval_cancel" 
+					type="object" class="oe_highlight" 
+					string="Cancel Approval" 
+					groups = "base.group_sale_manager"
+					attrs = "{'invisible':[('manager_approval','=','wait')]}" />							
+            	</xpath>
+        	</field>
+		</record>
+		
+		<!--Sale Quotation tree view-->	
+	   	<record id="res_quotation_approval_button" model="ir.ui.view">
+            <field name="name">Quotations</field>
+            <field name="model">sale.order</field>
+			<field name="inherit_id" ref="sale.view_quotation_tree"/>
+			<field name="type">form</field>
+            <field name="arch" type="xml">
+            	<xpath expr = "/tree" position ="inside">
+            		<field name="manager_approval" string="Approval Status"/>
+            	</xpath>
+            	<xpath expr="/tree" position="attributes">
+            		<attribute name="colors">green:manager_approval=='wait';grey:state=='cancel';blue:state in ('waiting_date','manual');red:state in ('invoice_except','shipping_except')</attribute>
+            	</xpath>
+            </field>
+        </record>
+        <!-- customizing the sale order tree view -->
+	   	<record id="res_sales_approval_button" model="ir.ui.view">
+            <field name="name">Sales Order Tree View</field>
+            <field name="model">sale.order</field>
+			<field name="inherit_id" ref="sale.view_order_tree"/>
+			<field name="type">form</field>
+            <field name="arch" type="xml">
+            	<xpath expr = "/tree" position ="inside">
+            		<field name="manager_approval" string="Approval Status"/>
+            	</xpath>
+            	<xpath expr="/tree" position="attributes">
+            		<attribute name="colors">green:manager_approval=='wait';grey:state=='cancel';blue:state in ('waiting_date','manual');red:state in ('invoice_except','shipping_except')</attribute>
+            	</xpath>
+            </field>
+        </record>
+					
+		<!--Hiding Validate button from the Employee -->
+	   	<record id="customer_invoice_validate_employee_perm" model="ir.ui.view">
+            <field name="name">Validate button permission</field>
+            <field name="model">account.invoice</field>
+			<field name="inherit_id" ref="account.invoice_form"/>
+			<field name="type">form</field>
+            <field name="arch" type="xml">
+            	<xpath expr="/form/header/button[@string='Validate']" position ="replace">
+            		<button name="invoice_open" 
+            		states='draft' string="Validate" class="oe_highlight" 
+            		groups="base.group_sale_manager,account.group_account_user" />
+    			<button name="invoice_open" 
+            		states='proforma2' string="Validate" class="oe_highlight" 
+            		groups="base.group_sale_manager,account.group_account_user"/>
+            	</xpath>
+            </field>
+        </record>
+        
+        <!--Overriding the sale orders and quotation action to give it a source_create -->
+        
+    	<record id="sale.action_quotations" model="ir.actions.act_window">
+            <field name="name">Quotations</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sale.order</field>
+            <field name="view_type">form</field>
+            <field name="view_id" ref="sale.view_quotation_tree"/>
+            <field name="view_mode">tree,form,calendar,graph</field>
+            <field name="context">{'source_create':4,'is_quoatation':True}</field>
+            <field name="domain">[('is_quoatation','=',True)]</field>
+            <field name="search_view_id" ref="sale.view_sales_order_filter"/>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to create a quotation, the first step of a new sale.
+              </p><p>
+                OpenERP will help you handle efficiently the complete sale flow:
+                from the quotation to the sales order, the
+                delivery, the invoicing and the payment collection.
+              </p><p>
+                The social feature helps you organize discussions on each sales
+                order, and allow your customers to keep track of the evolution
+                of the sales order.
+              </p>
+            </field>
+        </record>
+        <menuitem id="sale.menu_sale_quotations"
+        action="sale.action_quotations" parent="base.menu_sales"
+        sequence="4"/>
+        
+        <record id="sale.action_orders" model="ir.actions.act_window">
+            <field name="name">Sales Orders</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sale.order</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form,calendar,graph</field>
+            <field name="search_view_id" ref="sale.view_sales_order_filter"/>
+            <field name="context">{'source_create':4,'is_quoatation':False}</field>
+            <field name="domain">[('is_quoatation','=',False)]</field>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to create a quotation that can be converted into a sales
+                order.
+              </p><p>
+                OpenERP will help you efficiently handle the complete sales flow:
+                quotation, sales order, delivery, invoicing and payment.
+              </p>
+            </field>
+        </record>
+        <menuitem action="sale.action_orders" id="sale.menu_sale_order" parent="base.menu_sales" sequence="5" groups="base.group_sale_salesman,base.group_sale_manager"/>
+    </data>
+    
+	<data noupdate="1">
+		<delete id="crm.menu_crm_leads" model="ir.ui.menu"/>
+    	<delete id="crm.menu_crm_opportunities" model="ir.ui.menu"/>
+	</data>
+	    
+</openerp>
+
+
+
+

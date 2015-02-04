@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+
+        <!-- Sequences for sale.order -->
+        <record id="seq_mrp_bom_code_captherm" model="ir.sequence.type">
+            <field name="name">sequence.mrp.bom.code.captherm</field>
+            <field name="code">mrp.bom.captherm</field>
+        </record>
+
+        <record id="seq_mrp_bom_sequence_captherm" model="ir.sequence">
+            <field name="name">sequence.mrp.bom.sequence.captherm</field>
+            <field name="code">mrp.bom.captherm</field>
+            <field name="prefix">BOM</field>
+            <field name="padding">3</field>
+        </record>
+
+    </data>
+</openerp>
