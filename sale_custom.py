@@ -325,6 +325,7 @@ class res_partner_mod(osv.Model):
                 return id_pricelist
         return False    
     ##############################
+
     
     def write(self,cr,uid,id,vals,context=None):
        
