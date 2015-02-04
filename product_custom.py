@@ -586,7 +586,6 @@ class purchase_order_line(osv.osv):
         onchange handler of product_id.
         """
         
-        print "**********************************"
         if context is None:
             context = {}
 
@@ -615,7 +614,6 @@ class purchase_order_line(osv.osv):
             lang = partner_obj.lang
             if not (partner_obj.is_company):
                 if partner_obj.parent_id:
-                    print "====================================11111111111111111111111111111111111",partner_obj.parent_id.id
                     partner_id = partner_obj.parent_id.id
             context_partner.update( {'lang': lang, 'partner_id': partner_id} )
         product = product_product.browse(cr, uid, product_id, context=context_partner)
